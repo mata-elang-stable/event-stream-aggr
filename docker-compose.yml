@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: event-ingest-dashboard:latest
+    command:
+      - "-v"
+    env_file:
+      - .env
+    deploy:
+      mode: replicated
+      replicas: 1
