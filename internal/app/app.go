@@ -2,15 +2,16 @@ package app
 
 import (
 	"context"
+	"sync"
+	"time"
+
 	"github.com/alitto/pond/v2"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry/serde/avro"
 	"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry/serde/protobuf"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/logger"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/pb"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/processor"
-	"sync"
-	"time"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/logger"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/pb"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/processor"
 )
 
 var log = logger.GetLogger()

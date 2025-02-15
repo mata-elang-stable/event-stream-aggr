@@ -3,10 +3,11 @@ package processor
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/logger"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/pb"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/types"
 	"time"
+
+	"github.com/mata-elang-stable/event-stream-aggr/internal/logger"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/pb"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/types"
 )
 
 var log = logger.GetLogger()

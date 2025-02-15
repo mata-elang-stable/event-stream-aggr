@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/config"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/logger"
+	"os"
+
+	"github.com/mata-elang-stable/event-stream-aggr/internal/config"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 var (

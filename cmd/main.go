@@ -9,10 +9,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/app"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/config"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/kafka_client"
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/schema"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/app"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/config"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/kafka_client"
+	"github.com/mata-elang-stable/event-stream-aggr/internal/schema"
 	"github.com/spf13/cobra"
 )
 

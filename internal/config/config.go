@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/fadhilyori/sensor_events_handler_aggr/internal/logger"
 	"sync"
+
+	"github.com/mata-elang-stable/event-stream-aggr/internal/logger"
 )
 
 type Config struct {
