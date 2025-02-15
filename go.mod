@@ -1,4 +1,4 @@
-module github.com/fadhilyori/sensor_events_handler_aggr
+module github.com/mata-elang-stable/event-stream-aggr
 
 go 1.23
 
