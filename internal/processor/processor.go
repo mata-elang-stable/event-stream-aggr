@@ -85,6 +85,7 @@ func GetRawDataFromMetrics(data *pb.SensorEvent, metric *pb.Metric) *types.Snort
 		TCPLen:         metric.SnortTcpLen,
 		TCPSeq:         metric.SnortTcpSeq,
 		TCPWin:         metric.SnortTcpWin,
+		Timestamp:      metric.SnortTimestamp,
 		TOS:            data.SnortTypeOfService,
 		TTL:            metric.SnortTimeToLive,
 		UDPLen:         metric.SnortUdpLength,
