@@ -20,6 +20,7 @@ type CompletedEvent struct {
 	TotalEvents int64
 	Duration    time.Duration
 	isFailed    bool
+	failedCount int
 }
 
 type App struct {
@@ -34,6 +35,7 @@ type App struct {
 	logInterval     int
 	tasksStats      []*CompletedEvent
 	tasksStatsMutex sync.Mutex
+	total           int64
 }
 
 func NewApp(
@@ -81,6 +83,7 @@ func (a *App) PrintStats() {
 
 	eventProcessedTotal := int64(0)
 	failedBatchTotal := int64(0)
+	failedEventsTotal := 0
 	latencyTotal := time.Duration(0)
 
 	for _, task := range completedTasks {
@@ -88,16 +91,20 @@ func (a *App) PrintStats() {
 			failedBatchTotal++
 			continue
 		}
+		failedEventsTotal += task.failedCount
 		eventProcessedTotal += task.TotalEvents
 		latencyTotal += task.Duration
 	}
 
-	log.Infof("Sent %d events (avg %.2f/s) workers %d, waiting %d, failed %d tasks. avg latency %.2f ms\n",
+	a.total += eventProcessedTotal
+
+	log.Infof("[%d] Sent %d events (avg %.2f/s) workers %d, waiting %d, failed %d. avg latency %.2f ms\n",
+		a.total,
 		eventProcessedTotal,
 		float64(eventProcessedTotal)/float64(a.logInterval),
 		batchEventProcessedTotal,
 		waitingTasks,
-		failedBatchTotal,
+		failedEventsTotal,
 		float64(latencyTotal.Milliseconds())/float64(batchEventProcessedTotal),
 	)
 }
@@ -126,17 +133,22 @@ EventLoop:
 					startTime := time.Now()
 					isFailed := false
 
-					count, err := a.processMessage(e)
+					count, failedCount, err := a.processMessage(e)
 					if err != nil {
 						log.Errorf("Failed to process message: %v\n", err)
 						//a.currentFailedBatch.Add(1)
 						isFailed = true
 					}
 
+					if failedCount > 0 {
+						log.Errorf("Failed to process message: %v\n", failedCount)
+					}
+
 					taskStats := &CompletedEvent{
 						TotalEvents: count,
 						Duration:    time.Since(startTime),
 						isFailed:    isFailed,
+						failedCount: failedCount,
 					}
 
 					a.tasksStatsMutex.Lock()
@@ -158,12 +170,12 @@ EventLoop:
 	return nil
 }
 
-func (a *App) processMessage(msg *kafka.Message) (int64, error) {
+func (a *App) processMessage(msg *kafka.Message) (int64, int, error) {
 	startTime := time.Now()
 
 	value, err := a.deserializer.Deserialize(a.inputTopic, msg.Value)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	payload := value.(*pb.SensorEvent)
@@ -175,8 +187,7 @@ func (a *App) processMessage(msg *kafka.Message) (int64, error) {
 		{Key: "classification", Value: []byte(*payload.SnortClassification)},
 	}
 	topicPartition := kafka.TopicPartition{Topic: &a.outputTopic, Partition: kafka.PartitionAny}
-
-	draftResult := make([]*kafka.Message, 0)
+	failedEventCount := 0
 
 	for _, metric := range payload.Metrics {
 		payloadJson := processor.GetRawDataFromMetrics(payload, metric)
@@ -188,39 +199,29 @@ func (a *App) processMessage(msg *kafka.Message) (int64, error) {
 
 		payloadByte, err := a.serializer.Serialize(a.outputTopic, payloadJson)
 		if err != nil {
-			return 0, err
+			failedEventCount++
+			continue
 		}
 
-		draftResult = append(draftResult, &kafka.Message{
+		if err := a.ProduceMessage(&kafka.Message{
 			TopicPartition: topicPartition,
 			Key:            eventHashSha256Byte,
 			Value:          payloadByte,
 			Headers:        headerMessage,
 			Timestamp:      eventTime,
-		})
-	}
-	log.Tracef("[%s] finished processing %d events in %s\n", payload.EventHashSha256[:8], payload.EventMetricsCount, time.Since(startTime).String())
-
-	// Check if all messages are processed, with total of payload.EventMetricsCount
-	if len(draftResult) != int(payload.EventMetricsCount) {
-		return 0, err
-	}
-
-	// sent to result channel
-	for _, result := range draftResult {
-		log.Tracef("[draft] Producing message: %s\n", result.TopicPartition)
-
-		if err := a.ProduceMessage(result); err != nil {
-			return 0, err
+		}); err != nil {
+			failedEventCount++
+			continue
 		}
 	}
+
 	log.Tracef("[%s] finished sending %d events in %s\n", payload.EventHashSha256[:8], payload.EventMetricsCount, time.Since(startTime).String())
 
 	if _, err := a.consumer.CommitMessage(msg); err != nil {
-		return 0, err
+		return payload.EventMetricsCount, failedEventCount, err
 	}
 
-	return payload.EventMetricsCount, nil
+	return payload.EventMetricsCount, failedEventCount, nil
 }
 
 func (a *App) ProduceMessage(msg *kafka.Message) error {
