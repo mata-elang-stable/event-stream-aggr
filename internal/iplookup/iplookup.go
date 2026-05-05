@@ -23,7 +23,7 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
-//TODO: Implement the LookupIPs method using a worker pool
+// TODO: Implement the LookupIPs method using a worker pool
 // LookupIPs performs an IP lookup for a list of IPs and respond with array of JSON objects
 func (c *Client) LookupIPs(ips []string) error {
 	// Make sure there are no duplicate IPs to avoid unnecessary requests
@@ -31,7 +31,7 @@ func (c *Client) LookupIPs(ips []string) error {
 	for _, ip := range ips {
 		uniqueIPs[ip] = struct{}{}
 	}
-	
+
 	// Perform lookup for each IP
 	for ip := range uniqueIPs {
 		if err := c.LookupIP(ip); err != nil {
@@ -42,8 +42,7 @@ func (c *Client) LookupIPs(ips []string) error {
 	return nil
 }
 
-
-//TODO: Implement the LookupIP method
+// TODO: Implement the LookupIP method
 // LookupIP performs an IP lookup and prints the raw JSON response
 func (c *Client) LookupIP(ip string) error {
 	// Parse base URL

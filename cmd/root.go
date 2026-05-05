@@ -48,6 +48,10 @@ func init() {
 	viper.SetDefault("max_workers", 0)
 	viper.SetDefault("log_interval", 10)
 	viper.SetDefault("verbose", 0)
+	viper.SetDefault("security_protocol", "PLAINTEXT")
+	viper.SetDefault("path_to_ca", "")
+	viper.SetDefault("path_to_client_keystore", "")
+	viper.SetDefault("client_keystore_password", "")
 
 	if err := viper.Unmarshal(&conf); err != nil {
 		log.WithField("error", err).Fatalln("Failed to unmarshal configuration.")
@@ -59,6 +63,9 @@ func init() {
 	flags.StringVar(&conf.InputKafkaTopic, "input-topic", conf.InputKafkaTopic, "")
 	flags.StringVar(&conf.SchemaRegistryUrl, "schema-registry-url", conf.SchemaRegistryUrl, "")
 	flags.StringVar(&conf.OutputKafkaTopic, "output-topic", conf.OutputKafkaTopic, "")
+	flags.StringVar(&conf.PathToClientKeystore, "path-to-client-keystore", conf.PathToClientKeystore, "Path to the client PKCS#12 keystore file for mTLS")
+	flags.StringVar(&conf.ClientKeystorePassword, "client-keystore-password", conf.ClientKeystorePassword, "Password for the client PKCS#12 keystore")
+	// Keystore type no longer configurable: PKCS#12 is used for librdkafka by default
 	flags.CountVarP(&conf.VerboseCount, "verbose", "v", "Increase verbosity of the output.")
 
 	if err := viper.BindPFlags(flags); err != nil {

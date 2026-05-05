@@ -22,10 +22,16 @@ ENV GO111MODULE=on
 
 RUN go build -ldflags "-X main.appVersion=${APP_VERSION} -X main.appCommit=${APP_COMMIT} -X main.appLicense=${APP_LICENSE}" -tags dynamic -tags musl -o /go/bin/app ./cmd/
 
-FROM golang:${GO_VERSION}-alpine
+FROM alpine
+
+RUN adduser -D -u 1000 appuser && \
+    mkdir -p /go/bin && \
+    chown -R appuser:appuser /go/bin
+
+COPY --from=build --chown=appuser:appuser /go/bin/app /go/bin/app
 
 RUN apk add --no-cache librdkafka
 
-COPY --from=build /go/bin/app /go/bin/app
+USER appuser
 
 ENTRYPOINT ["/go/bin/app"]

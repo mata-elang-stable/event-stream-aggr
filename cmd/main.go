@@ -51,18 +51,18 @@ func runApp(cmd *cobra.Command, args []string) {
 	}()
 
 	log.Infof("Configuring the kafka client\n")
-	kafkaConsumer, err := kafka_client.MustNewConsumer(conf.KafkaBrokers, conf.InputKafkaTopic)
+	kafkaConsumer, err := kafka_client.MustNewConsumer(conf.KafkaBrokers, conf.InputKafkaTopic, conf.SecurityProtocol, conf.PathToCA, conf.PathToClientKeystore, conf.ClientKeystorePassword)
 	if err != nil {
 		log.Fatalf("Failed to create kafka consumer: %v", err)
 	}
 
-	kafkaProducer, err := kafka_client.MustNewProducer(conf.KafkaBrokers)
+	kafkaProducer, err := kafka_client.MustNewProducer(conf.KafkaBrokers, conf.SecurityProtocol, conf.PathToCA, conf.PathToClientKeystore, conf.ClientKeystorePassword)
 	if err != nil {
 		log.Fatalf("Failed to create kafka producer: %v", err)
 	}
 
 	log.Infof("Configuring the schema registry client\n")
-	schemaRegistryClient := schema.MustNewSchemaRegistryClient(conf.SchemaRegistryUrl)
+	schemaRegistryClient := schema.MustNewSchemaRegistryClient(conf.SchemaRegistryUrl, conf.PathToCA)
 
 	deserializer := schema.MustNewProtobufDeserializer(schemaRegistryClient)
 	serializer := schema.MustNewAvroSerializer(schemaRegistryClient)

@@ -27,6 +27,18 @@ type Config struct {
 
 	// VerboseCount is the verbose level.
 	VerboseCount int `mapstructure:"verbose"`
+
+	// SecurityProtocol is the security protocol to use.
+	SecurityProtocol string `mapstructure:"security_protocol"`
+
+	// PathToCA is the path to the CA certificate file.
+	PathToCA string `mapstructure:"path_to_ca"`
+
+	// PathToClientKeystore is the path to a PKCS#12 keystore that contains client certificate and key
+	PathToClientKeystore string `mapstructure:"path_to_client_keystore"`
+
+	// ClientKeystorePassword is the password for the keystore file
+	ClientKeystorePassword string `mapstructure:"client_keystore_password"`
 }
 
 var log = logger.GetLogger()
@@ -63,4 +75,12 @@ func (c *Config) PrintAllConfigs() {
 	log.Printf("OutputKafkaTopic: %s\n", c.OutputKafkaTopic)
 	log.Printf("MaxWorkers: %d\n", c.MaxWorkers)
 	log.Printf("VerboseCount: %d\n", c.VerboseCount)
+	log.Printf("SecurityProtocol: %s\n", c.SecurityProtocol)
+	log.Printf("PathToCA: %s\n", c.PathToCA)
+	log.Printf("PathToClientKeystore: %s\n", c.PathToClientKeystore)
+	if c.ClientKeystorePassword != "" {
+		log.Printf("ClientKeystorePassword: (set)\n")
+	} else {
+		log.Printf("ClientKeystorePassword: (not set)\n")
+	}
 }

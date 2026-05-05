@@ -11,8 +11,11 @@ import (
 
 var log = logger.GetLogger()
 
-func MustNewSchemaRegistryClient(schemaRegistryUrl string) schemaregistry.Client {
-	client, err := schemaregistry.NewClient(schemaregistry.NewConfig(schemaRegistryUrl))
+func MustNewSchemaRegistryClient(schemaRegistryUrl string, pathToCA string) schemaregistry.Client {
+	config := schemaregistry.NewConfig(schemaRegistryUrl)
+	config.SslCaLocation = pathToCA
+
+	client, err := schemaregistry.NewClient(config)
 	if err != nil {
 		log.Fatalf("Failed to create schema registry client: %s\n", err)
 	}
